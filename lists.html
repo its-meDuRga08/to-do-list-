@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cherry Blossom To-Do List</title>
+    <!-- Google Fonts for Cute Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS STYLES --- */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        body {
+            /* Pastel Pink Background */
+            background: linear-gradient(to top, #070707 0%, #960896 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Petals ke liye */
+            position: relative;
+        }
+
+        /* Main Container (The Card) */
+        .todo-container {
+            background: rgba(16, 27, 182, 0.85);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+            z-index: 10; /* Petals ke upar rahega */
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        h1 {
+            color: #ff6b81;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        /* Input Area */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ffd1dc;
+            border-radius: 20px;
+            outline: none;
+            color: #555;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #ff6b81;
+            box-shadow: 0 0 5px rgba(255, 107, 129, 0.2);
+        }
+
+        button#add-btn {
+            background-color: #ff6b81;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        button#add-btn:hover {
+            background-color: #ff4757;
+            transform: scale(1.05);
+        }
+
+        /* List Styling */
+        ul {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto; /* Scrollable if many tasks */
+        }
+
+        /* Scrollbar styling */
+        ul::-webkit-scrollbar {
+            width: 6px;
+        }
+        ul::-webkit-scrollbar-thumb {
+            background-color: #ffd1dc;
+            border-radius: 10px;
+        }
+
+        li {
+            background: #fff;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 5px solid #ffd1dc;
+            animation: popIn 0.3s ease;
+        }
+
+        li:hover {
+            transform: translateX(5px);
+        }
+
+        li.checked {
+            text-decoration: line-through;
+            color: #aaa;
+            background: #f9f9f9;
+            border-left-color: #aaa;
+        }
+
+        li.checked .delete-btn {
+            color: #aaa;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            color: #ff6b81;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .delete-btn:hover {
+            color: #ff0000;
+            transform: scale(1.2);
+        }
+
+        /* --- PETALS ANIMATION --- */
+        .petal {
+            position: absolute;
+            top: -10%;
+            background: #ffc2d1;
+            opacity: 0.8;
+            border-radius: 100% 0 100% 0;
+            z-index: 1; /* Container ke peeche */
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+                transform: translateX(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                top: 110%;
+                transform: translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Petals Container (JS will fill this) -->
+    <div id="petals-container"></div>
+
+    <div class="todo-container">
+        <h1>✨ My Tasks ✨</h1>
+        
+        <div class="input-group">
+            <input type="text" id="input-box" placeholder="what to do? ...">
+            <button id="add-btn">+</button>
+        </div>
+
+        <ul id="list-container">
+            <!-- Tasks yahan aayenge -->
+        </ul>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+
+        const inputBox = document.getElementById("input-box");
+        const listContainer = document.getElementById("list-container");
+        const addBtn = document.getElementById("add-btn");
+
+        // Function to add task
+        function addTask() {
+            if(inputBox.value === ''){
+                alert("please write something!");
+            }
+            else {
+                let li = document.createElement("li");
+                li.innerHTML = inputBox.value;
+                listContainer.appendChild(li);
+
+                let span = document.createElement("span");
+                span.innerHTML = "\u00d7"; // Cross sign
+                li.appendChild(span);
+            }
+            inputBox.value = "";
+            saveData(); // Data save karo
+        }
+
+        // Click event for adding
+        addBtn.addEventListener("click", addTask);
+
+        // Click event for checking/deleting
+        listContainer.addEventListener("click", function(e){
+            if(e.target.tagName === "LI"){
+                e.target.classList.toggle("checked");
+                saveData();
+            }
+            else if(e.target.tagName === "SPAN"){
+                e.target.parentElement.remove();
+                saveData();
+            }
+        }, false);
+
+        // Enter key press support
+        inputBox.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                addTask();
+            }
+        });
+
+        // Local Storage: Save tasks
+        function saveData(){
+            localStorage.setItem("data", listContainer.innerHTML);
+        }
+
+        // Local Storage: Show tasks on reload
+        function showTask(){
+            listContainer.innerHTML = localStorage.getItem("data");
+        }
+        showTask();
+
+
+        /* --- CHERRY BLOSSOM PETALS GENERATOR --- */
+        function createPetals() {
+            const petalContainer = document.getElementById('petals-container');
+            const petalCount = 25; // Kitni petals chahiye
+
+            for (let i = 0; i < petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                
+                // Randomize size
+                const size = Math.random() * 15 + 10 + 'px';
+                petal.style.width = size;
+                petal.style.height = size;
+
+                // Randomize position
+                petal.style.left = Math.random() * 100 + 'vw';
+                
+                // Randomize animation duration (speed)
+                petal.style.animationDuration = Math.random() * 3 + 2 + 's';
+                
+                // Randomize delay
+                petal.style.animationDelay = Math.random() * 5 + 's';
+
+                petalContainer.appendChild(petal);
+            }
+        }
+
+        createPetals();
+
+    </script>
+</body>
+</html>
